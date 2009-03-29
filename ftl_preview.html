@@ -17,7 +17,7 @@ console.debug(t);
             var engine = freemarker.create(t);
 	    document.getElementById('node').innerHTML = 
 		freemarker.render(engine, {messageEndPointLookupKey:'hi', copyLink:'opa', 
-			copyLinkOnClick:'1', envelopes:{a:1, b:2}});
+			copyLinkOnClick:'1', envelopes:[1, 2]});
         </script>
 
 </body>

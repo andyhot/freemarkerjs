@@ -25,9 +25,12 @@ var freemarker = {
 			// <#list envelopes as envelope >
 			var match = cmd.match(/\s*(\S*)\s*as\s*(\S*)\s*/);
 			if (match) {
-				parts.push("for (var " + match[2] + " in " + match[1] + ")");
+				parts.push("for (var " + match[2] + "_index in " + match[1] + ")");
 			}
 			parts.push("{");
+            if (match) {
+                parts.push("var " + match[2] + "=" + match[1] + "[" + match[2] + "_index];");
+            }
 		}},
 		'endlist': {start:'</#list', end:'>', process:function(parts, cmd) {			
 			parts.push("}");
