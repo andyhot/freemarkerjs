@@ -73,7 +73,7 @@ var freemarker = {
 		parts.push("var p=[];");
 		var pos=0;
 		while (pos>=0) {
-			var token = this.nextToken(template, pos);console.debug(token);
+			var token = this.nextToken(template, pos);
 			if (!token.symbol) {
 				parts.push(this._o(template.substring(pos)));
 				break;
@@ -86,7 +86,7 @@ var freemarker = {
 			pos = token.endPos+1;
 		}
 		parts.push("this._out = unescape(p.join(''));");
-		console.debug(parts.join('\n'));
+
 		var engine={
 			compiled:parts.join(''),
 			template:template
@@ -97,7 +97,7 @@ var freemarker = {
 	render: function(engine, context) {
 		context = context || {};
 		var vars = this._setlocalvarscode(context);
-		(function(){eval(vars+engine.compiled);}).call(context);console.debug(context._out);
+		(function(){eval(vars+engine.compiled);}).call(context);
 		return context._out;
 	}
 }; 
