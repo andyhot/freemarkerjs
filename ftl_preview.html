@@ -1,0 +1,23 @@
+        <html>
+<head>
+	<title>FM</title>
+</head>
+<body>
+
+<div id="node">Node</div>
+
+        <script src="freemarker.js" type="text/javascript" id="Any_0"></script>
+        
+        <script type="text/javascript">
+
+var t="<div id=\"${messageEndPointLookupKey}\" class=\"${messageEndPointLookupKey} amptpl_Block \"></div>"+
++"</#if><#if tipLink??><br/><a href=\"${tipLink}\">If you like this, tip this!</a>&nbsp;</#if><#if " +"copyLink??><#if copyLinkOnClick??><a href=\"${copyLink}\" onclick=\"${copyLinkOnClick}\">copy"
++" this!</a><#else><a href=\"${copyLink}\">copy this!</a></#if></#if><hr/></div>";
+
+            var engine = freemarker.create(t);
+	    document.getElementById('node').innerHTML = 
+		freemarker.render(engine, {messageEndPointLookupKey:'hi', copyLink:'opa', copyLinkOnClick:'1'});
+        </script>
+
+</body>
+</html>
