@@ -1,17 +1,43 @@
 var freemarker = {
 	symbols: {	
-		'replace': {start:'${', end:'}'},
-		'if': {start:'<#if', end:'>'},
-		'endif': {start:'</#if', end:'>'},
-		'else': {start:'<#else', end:'>'},
-		'list': {start:'<#list', end:'>'},
-		'endlist': {start:'</#list', end:'>'},
+		'replace': {start:'${', end:'}', process:function(parts, cmd) {
+			parts.push(freemarker._p(cmd));
+		}},
+		'if': {start:'<#if', end:'>', process:function(parts, cmd) {
+			if (cmd.indexOf('??')) {
+				var expr = cmd.substring(0, cmd.length-2);
+				var pos = expr.lastIndexOf('.');
+				if (pos<0) {
+					expr = "window." + expr;
+				}
+				parts.push("if (" /*+ "this."*/ + expr + ") {");
+			} else {
+				parts.push("if (" + cmd + ") {");
+			}
+		}},
+		'endif': {start:'</#if', end:'>', process:function(parts, cmd) {
+			parts.push("}");
+		}},
+		'else': {start:'<#else', end:'>', process:function(parts, cmd) {
+			parts.push("} else {");
+		}},
+		'list': {start:'<#list', end:'>', process:function(parts, cmd) {
+			// <#list envelopes as envelope >
+			var match = cmd.match(/\s*(\S*)\s*as\s*(\S*)\s*/);
+			if (match) {
+				parts.push("for (var " + match[2] + " in " + match[1] + ")");
+			}
+			parts.push("{");
+		}},
+		'endlist': {start:'</#list', end:'>', process:function(parts, cmd) {			
+			parts.push("}");
+		}}
 	},
 	_o : function(cmd) {
 		return "p.push(\"" + escape(cmd) + "\");";
 	},
 	_p : function(cmd) {
-		return "p.push(this." + cmd + ");";
+		return "p.push(" /*+ "this."*/ + cmd + ");";
 	},
 	_d : function(cmd) {
 		return "console.debug(this, \"" + escape(cmd) + "\");";
@@ -26,11 +52,11 @@ var freemarker = {
 	nextToken: function(template, pos) {
 		var newPos;
 		var endPos;
-		var found={newPos:-1};
+		var found={};
 		for (var i in this.symbols) {
 			var symbol = this.symbols[i];
 			var n = template.indexOf(symbol.start, pos);
-			if (n>=0 && (!found.newPos || n<found.newPos)) {
+			if (n>=0 && (!found.symbol || n<found.newPos)) {
 				var e = template.indexOf(symbol.end, n);
 				if (e>=0) {
 					found.newPos = n;
@@ -47,24 +73,20 @@ var freemarker = {
 		parts.push("var p=[];");
 		var pos=0;
 		while (pos>=0) {
-			var token = this.nextToken(template, pos);
-			var newPos = template.indexOf("${", pos);
-			if (newPos<0) {
+			var token = this.nextToken(template, pos);console.debug(token);
+			if (!token.symbol) {
 				parts.push(this._o(template.substring(pos)));
 				break;
 			}
-			var endPos = template.indexOf("}", newPos);
-			if (endPos<0) {
-				parts.push(this._o(template.substring(pos)));
-				break;
+			parts.push(this._o(template.substring(pos, token.newPos)));
+			if (token.symbol.process) {
+				token.symbol.process(parts, template.substring(token.start, token.endPos));
 			}
-			parts.push(this._o(template.substring(pos, newPos)));
-			parts.push(this._p(template.substring(newPos+2, endPos)));
 			
-			pos = endPos+1;
+			pos = token.endPos+1;
 		}
 		parts.push("this._out = unescape(p.join(''));");
-		console.debug(parts);
+		console.debug(parts.join('\n'));
 		var engine={
 			compiled:parts.join(''),
 			template:template
@@ -74,8 +96,8 @@ var freemarker = {
 
 	render: function(engine, context) {
 		context = context || {};
-		//var vars = this._setlocalvarscode(context);
-		(function(){eval(/*vars+*/engine.compiled);}).call(context);
+		var vars = this._setlocalvarscode(context);
+		(function(){eval(vars+engine.compiled);}).call(context);console.debug(context._out);
 		return context._out;
 	}
 }; 

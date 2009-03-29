@@ -10,13 +10,14 @@
         
         <script type="text/javascript">
 
-var t="<div id=\"${messageEndPointLookupKey}\" class=\"${messageEndPointLookupKey} amptpl_Block \"></div>"+
-+"</#if><#if tipLink??><br/><a href=\"${tipLink}\">If you like this, tip this!</a>&nbsp;</#if><#if " +"copyLink??><#if copyLinkOnClick??><a href=\"${copyLink}\" onclick=\"${copyLinkOnClick}\">copy"
-+" this!</a><#else><a href=\"${copyLink}\">copy this!</a></#if></#if><hr/></div>";
-
+var t="<#list envelopes as envelope><div id=\"${messageEndPointLookupKey}\" class=\"${messageEndPointLookupKey} amptpl_Block \"></div>"
++"<#if tipLink??><br/><a href=\"${tipLink}\">If you like this, tip this!</a>&nbsp;</#if><#if " +"copyLink??><#if copyLinkOnClick??><a href=\"${copyLink}\" onclick=\"${copyLinkOnClick}\">copy"
++" this!</a><#else><a href=\"${copyLink}\">copy this!</a></#if></#if><hr/></div> </#list>";
+console.debug(t);
             var engine = freemarker.create(t);
 	    document.getElementById('node').innerHTML = 
-		freemarker.render(engine, {messageEndPointLookupKey:'hi', copyLink:'opa', copyLinkOnClick:'1'});
+		freemarker.render(engine, {messageEndPointLookupKey:'hi', copyLink:'opa', 
+			copyLinkOnClick:'1', envelopes:{a:1, b:2}});
         </script>
 
 </body>
