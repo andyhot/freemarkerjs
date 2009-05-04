@@ -13,6 +13,25 @@
 // limitations under the License.
 
 var freemarker = {
+	// Currently supports basic interpolations and directives:
+	// if, else, list 
+
+	// Usage:
+	// var engine = freemarker.create("Hello ${name}");
+	// alert( freemarker.render(engine, {name:'Bob'}) );
+	// // or if don't plan to reuse the engine
+	// alert( freemarker.render("Hello ${name}", {name:'Bob'}); );
+
+	// TODO:
+	// - support default values, i.e. ${user!"Anonymous"}
+	// - null resistance in above expressions if in parenthesis
+	// - support methods, i.e. ${avg(3, 5)}
+	// - alternative syntax if starts with [#ftl]
+	// - ftl comments ( <#-- ftl --> )
+	// - directives elseif, switch, case, default, break, stop, compress, noparse, assign
+	// see http://freemarker.sourceforge.net/docs/ref_directives.html
+	// - string builtin for booleans, i.e. boolean?string("yes", "no")
+	// - t, lt, rt, nt directives (or atleast ignore them)
 	symbols: {	
 		'replace': {start:'${', end:'}', process:function(parts, cmd) {
 			parts.push(freemarker._p(cmd));
@@ -21,10 +40,10 @@ var freemarker = {
 			if (cmd.indexOf('??')) {
 				var expr = cmd.substring(0, cmd.length-2);
 				var pos = expr.lastIndexOf('.');
-				if (pos<0) {
-					expr = "window." + expr;
+				/*if (pos<0)*/ {
+					expr = freemarker._v(expr);
 				}
-				parts.push("if (" /*+ "this."*/ + expr + ") {");
+				parts.push("if (" + expr + ") {");
 			} else {
 				parts.push("if (" + cmd + ") {");
 			}
@@ -39,11 +58,11 @@ var freemarker = {
 			// <#list envelopes as envelope >
 			var match = cmd.match(/\s*(\S*)\s*as\s*(\S*)\s*/);
 			if (match) {
-				parts.push("for (var " + match[2] + "_index in " + match[1] + ")");
+				parts.push("for (var " + match[2] + "_index in " + freemarker._v(match[1]) + ")");
 			}
 			parts.push("{");
             if (match) {
-                parts.push("var " + match[2] + "=" + match[1] + "[" + match[2] + "_index];");
+                parts.push(freemarker._v(match[2]) + "=" + freemarker._v(match[1]) + "[" + match[2] + "_index];");
             }
 		}},
 		'endlist': {start:'</#list', end:'>', process:function(parts, cmd) {			
@@ -54,15 +73,19 @@ var freemarker = {
 		return "p.push(\"" + escape(cmd) + "\");";
 	},
 	_p : function(cmd) {
-		return "p.push(" /*+ "this."*/ + cmd + ");";
+		return "p.push(" + freemarker._v(cmd) + ");";
 	},
 	_d : function(cmd) {
 		return "console.debug(this, \"" + escape(cmd) + "\");";
 	},
+	_v : function(name) {
+		return /*"this._vars." + */'this.'+name;
+	},
 	_setlocalvarscode: function(obj) {
 		var buf = [];
+		buf.push("this._vars={};");
 		for (var p in obj) {
-			buf.push("var ", p, " = this['", p, "'];\n");
+			buf.push("this._vars.", p, " = this['", p, "'];\n");
 		}
 		return buf.join('');
 	},
@@ -108,13 +131,18 @@ var freemarker = {
 			compiled:parts.join(''),
 			template:template
 		};
+		//console.debug(parts.join('\n'));
 		return engine;
 	},
 
 	render: function(engine, context) {
+		if (typeof engine == "string" || engine instanceof String) {
+			engine = this.create(engine);
+		}
 		context = context || {};
 		var vars = this._setlocalvarscode(context);
-		(function(){eval(vars+engine.compiled);}).call(context);
+		//(function(){eval(vars+engine.compiled);}).call(context);
+		(function(){eval(engine.compiled);}).call(context);
 		return context._out;
 	}
 }; 
