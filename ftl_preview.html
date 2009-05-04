@@ -24,7 +24,7 @@
 			node.className = expected==text ? 'green' : 'red';
 		}
 	}
-	var listTemplate1 = "<#list envelopes as envelope><div id=\"${envelope.id}\" class=\"amptpl_Block \">${envelope.title}"
+	var template1 = "<#list envelopes as envelope><div id=\"${envelope.id}\" class=\"amptpl_Block \">${envelope.title}"
 	+"</div><#if tipLink??><br/><a href=\"${tipLink}\">If you like this, tip this!</a>&nbsp;</#if><#if "
 	+"copyLink??><#if copyLinkOnClick??><a href=\"${copyLink}\" onclick=\"${copyLinkOnClick}\">copy"
 	+" this!</a><#else><a href=\"${copyLink}\">copy this!</a></#if></#if><hr/></#list>";
@@ -34,8 +34,15 @@
 		+"<div id=\"2\" class=\"amptpl_Block \">Hello</div><br/><a href=\"http://amplafi.net\">"
 		+"If you like this, tip this!</a>&nbsp;<a href=\"opa\" onclick=\"1\">copy this!</a><hr/>";
  
- 	doTemplate(listTemplate1, { copyLink:'opa', copyLinkOnClick:'1', tipLink:'http://amplafi.net', 
+ 	doTemplate(template1, { copyLink:'opa', copyLinkOnClick:'1', tipLink:'http://amplafi.net', 
 		envelopes:[{id:1, title:'Help'}, {id:2, title:'Hello'}] }, 'node1', expected1);
+
+	var template2 = "Teams:<br /><#list teams as team>${team.name}<ul>"
+		+"<#list team.players as player><li>${player.name}</li></#list></ul></#list>";
+	var expected2 = "Teams:<br />PAO<ul><li>Ninis</li><li>Karagounis</li><li>Galinovich</li></ul>"
+		+ "AEK<ul><li>Blanco</li></ul>";
+	doTemplate(template2, { teams:[ {name:'PAO', players:[{name:'Ninis'}, {name:'Karagounis'}, {name:'Galinovich'}]}, 
+		{name:'AEK', players:[{name:'Blanco'}] } ]}, 'node2', expected2);
     </script>
 
 </body>
