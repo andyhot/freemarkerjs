@@ -13,8 +13,11 @@
 // limitations under the License.
 
 var freemarker = {
-	// Currently supports basic interpolations and directives:
-	// if, else, list 
+	// Currently supports:
+	// - basic interpolations
+	// - directives:
+	// 		if, else, list 
+	// - size builtin for arrays
 
 	// Usage:
 	// var engine = freemarker.create("Hello ${name}");
@@ -37,12 +40,13 @@ var freemarker = {
 			parts.push(freemarker._p(cmd));
 		}},
 		'if': {start:'<#if', end:'>', process:function(parts, cmd) {
-			if (cmd.indexOf('??')) {
+			if (cmd.indexOf('??')>=0) {
 				var expr = cmd.substring(0, cmd.length-2);
-				var pos = expr.lastIndexOf('.');
-				/*if (pos<0)*/ {
-					expr = freemarker._v(expr);
-				}
+				expr = freemarker._v(expr);
+				parts.push("if (" + expr + ") {");
+			} else if (cmd.indexOf('?size')>=0) {
+				var pos = cmd.indexOf('?size');
+				var expr = freemarker._v(cmd.substring(0, pos)) + '.length' + cmd.substring(pos+5);
 				parts.push("if (" + expr + ") {");
 			} else {
 				parts.push("if (" + cmd + ") {");

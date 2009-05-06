@@ -43,6 +43,10 @@
 		+ "AEK<ul><li>Blanco</li></ul>";
 	doTemplate(template2, { teams:[ {name:'PAO', players:[{name:'Ninis'}, {name:'Karagounis'}, {name:'Galinovich'}]}, 
 		{name:'AEK', players:[{name:'Blanco'}] } ]}, 'node2', expected2);
+
+	var template3 = "<#if s?size!=0>Data:<hr /><#list s as n>${n}.</#list><#else>No data.</#if>";
+	doTemplate(template3, {s:[]}, 'node3', "No data.");
+	doTemplate(template3, {s:['emi', 'andy']}, 'node4', "Data:<hr />emi.andy.");
     </script>
 
 </body>
