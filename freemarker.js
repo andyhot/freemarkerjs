@@ -77,13 +77,13 @@ var freemarker = {
 		return "p.push(\"" + escape(cmd) + "\");";
 	},
 	_p : function(cmd) {
-		return "p.push(" + freemarker._v(cmd) + ");";
+		return "p.push(" + freemarker._v(cmd, true) + ");";
 	},
 	_d : function(cmd) {
 		return "console.debug(this, \"" + escape(cmd) + "\");";
 	},
-	_v : function(name) {
-		return /*"this._vars." + */'this.'+name;
+	_v : function(name, out) {
+		return out ? 'this._fm_out(this.'+name+')' : 'this.'+name;
 	},
 	_setlocalvarscode: function(obj) {
 		var buf = [];
@@ -144,6 +144,16 @@ var freemarker = {
 			engine = this.create(engine);
 		}
 		context = context || {};
+		context._fm_out = function(val){
+			if (typeof val == 'object'){
+				if (typeof val._render == 'function')
+					return val._render();
+				else if (val[0])
+					return val[0];				
+			} 
+
+			return val;
+		};
 		var vars = this._setlocalvarscode(context);
 		//(function(){eval(vars+engine.compiled);}).call(context);
 		(function(){eval(engine.compiled);}).call(context);

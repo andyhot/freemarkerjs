@@ -12,6 +12,8 @@
 	<div id="node2"> </div>
 	<div id="node3"> </div>
 	<div id="node4"> </div>
+	<div id="node5"> </div>
+	<div id="node6"> </div>
 
 	<script src="freemarker.js" type="text/javascript" id="Any_0"></script>        
     <script type="text/javascript">
@@ -47,6 +49,10 @@
 	var template3 = "<#if s?size!=0>Data:<hr /><#list s as n>${n}.</#list><#else>No data.</#if>";
 	doTemplate(template3, {s:[]}, 'node3', "No data.");
 	doTemplate(template3, {s:['emi', 'andy']}, 'node4', "Data:<hr />emi.andy.");
+
+	doTemplate(template3, {s:[["12/07/2008 02:00",{"timeInMillis":1228608040000,"timeZoneID":"Europe/Athens"},null,null]]}, 'node5', "Data:<hr />12/07/2008 02:00.");
+
+	doTemplate(template3, {s:[{_render:function(){return this.data[0] + ' at ' + this.data[1].timeZoneID;},data:["12/07/2008 02:00",{"timeInMillis":1228608040000,"timeZoneID":"Europe/Athens"},null,null]}]}, 'node6', "Data:<hr />12/07/2008 02:00 at Europe/Athens.");
     </script>
 
 </body>
